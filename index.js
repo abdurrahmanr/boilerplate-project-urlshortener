@@ -19,14 +19,14 @@ app.use(cors());
 app.use("/public", express.static(`${process.cwd()}/public`));
 
 app.get("/", function (req, res) {
-  res.sendFile(process.cwd() + "/views/index.html");
+  return res.sendFile(process.cwd() + "/views/index.html");
 });
 
 app.post("/api/shorturl", async function (req, res) {
   const { url } = req.body;
 
   // validate url
-  if (!regex.test(url)) return res.send({ error: "Invalid Url" });
+  if (!regex.test(url)) return res.json({ error: "invalid url" });
 
   // see if url already exist in the DB
   const exist = await Url.find({ original_url: url });
@@ -52,7 +52,7 @@ app.post("/api/shorturl", async function (req, res) {
   });
 
   newUrl.save().then((response) => {
-    res.json({
+    return res.json({
       original_url: response.original_url,
       short_url: response.short_url,
     });
@@ -64,7 +64,7 @@ app.get("/api/shorturl/:shorturl", async function (req, res) {
   const exist = await Url.find({ short_url: shorturl });
 
   if (exist.length > 0) {
-    res.redirect(exist[0].original_url);
+    return res.redirect(exist[0].original_url);
   }
 
   return res.json({ error: "URL doesn't exist in the database" });
